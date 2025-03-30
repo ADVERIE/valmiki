@@ -16,8 +16,8 @@ This microservice provides a REST API endpoint to predict the age group and gend
 
 1.  **Clone the Repository:**
     ```bash
-    git clone <your-repo-url>
-    cd age-gender-prediction-service
+    git clone git@github.com:ADVERIE/valmiki.git
+    cd valmiki
     ```
 
 2.  **Download Models:**
@@ -35,18 +35,18 @@ This microservice provides a REST API endpoint to predict the age group and gend
 
 3.  **Build the Docker Image:**
     ```bash
-    docker build -t age-gender-predictor .
+    docker build -t valmiki .
     ```
 
 ## Running the Service
 
 1.  **Run the Docker Container:**
     ```bash
-    docker run -p 8000:8000 --name age-gender-app age-gender-predictor
+    docker run -p 8000:8000 --name valmiki valmiki
     ```
     * `-p 8000:8000`: Maps port 8000 on your host machine to port 8000 inside the container.
-    * `--name age-gender-app`: Assigns a name to the running container for easier management.
-    * You can override the port using the `-e` flag: `docker run -p 8080:8080 -e PORT=8080 --name age-gender-app age-gender-predictor`
+    * `--name valmiki`: Assigns a name to the running container for easier management.
+    * You can override the port using the `-e` flag: `docker run -p 8080:8080 -e PORT=8080 --name valmiki valmiki`
 
 ## API Endpoints
 
