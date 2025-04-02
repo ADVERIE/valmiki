@@ -2,14 +2,17 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
 import logging
 import os
+import threading
 from typing import Dict
 
 from . import predictor
+from . import grpc_server
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 PORT = int(os.environ.get("PORT", 8000))
+GRPC_PORT = int(os.environ.get("GRPC_PORT", 50052))
 
 app = FastAPI(
     title="Age and Gender Prediction API",
@@ -24,7 +27,21 @@ async def startup_event():
         logger.info("Models loaded successfully via predictor module.")
     else:
         logger.error("One or more models failed to load. Check predictor logs.")
-    logger.info(f"API running on port {PORT}")
+    
+    logger.info(f"REST API running on port {PORT}")
+    
+    threading.Thread(target=start_grpc_server, daemon=True).start()
+
+
+def start_grpc_server():
+    """Start the gRPC server in a background thread."""
+    try:
+        logger.info(f"Starting gRPC server on port {GRPC_PORT}...")
+        server = grpc_server.serve()
+        logger.info(f"gRPC server started successfully on port {GRPC_PORT}")
+        server.wait_for_termination()
+    except Exception as e:
+        logger.error(f"Failed to start gRPC server: {e}")
 
 
 @app.get("/health", tags=["Health Check"])
@@ -80,6 +97,9 @@ async def predict(file: UploadFile = File(...)) -> JSONResponse:
              else:
                  raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=results['error'])
 
+        if "age" in results:
+            results["age_group"] = grpc_server.map_age_to_group(results["age"])
+        
         logger.info(f"Prediction successful: Age={results.get('age')}, Gender={results.get('gender')}")
         return JSONResponse(content=results)
 
@@ -93,4 +113,4 @@ async def predict(file: UploadFile = File(...)) -> JSONResponse:
 if __name__ == "__main__":
     import uvicorn
     logger.info(f"Starting Uvicorn server directly on port {PORT}...")
-    uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True) # reload=True for development
+    uvicorn.run("app.main:app", host="0.0.0.0", port=PORT, reload=True) # reload=True for development

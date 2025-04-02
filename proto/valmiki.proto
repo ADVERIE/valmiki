@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package valmiki;
+
+option go_package = "gyandoot-svc/proto/valmiki";
+
+message PredictRequest {
+    bytes image_data = 1;
+}
+
+message PredictResponse {
+    string age_group = 1; 
+    string gender = 2;    
+    float confidence = 3; 
+}
+
+service ValmikiService {
+    rpc Predict(PredictRequest) returns (PredictResponse);
+}

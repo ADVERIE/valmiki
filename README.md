@@ -42,7 +42,15 @@ This microservice provides a REST API endpoint to predict the age group and gend
 
 1.  **Run the Docker Container:**
     ```bash
-    docker run -p 8000:8000 --name valmiki valmiki
+    docker stop valmiki-svc
+    docker rm valmiki-svc
+    docker build -t valmiki .
+    docker run -d --name valmiki-svc \
+      -p 8000:8000 \
+      -p 50052:50052 \
+      -e PORT=8000 \
+      -e GRPC_PORT=50052 \
+      valmiki
     ```
     * `-p 8000:8000`: Maps port 8000 on your host machine to port 8000 inside the container.
     * `--name valmiki`: Assigns a name to the running container for easier management.
@@ -114,7 +122,7 @@ The service will be available at `http://localhost:8000` (or the host port you m
 
 ## Configuration (Environment Variables)
 
-* `PORT`: The port number the Uvicorn server inside the container listens on. Defaults to `8000`. Can be set during `docker run` using the `-e PORT=<desired_port>` flag (remember to map the host port accordingly with `-p`). Model paths are currently hardcoded relative to the `predictor.py` file but could be made configurable via environment variables if needed.
+* `PORT`: The port number the Uvicorn server inside the container listens on. Defaults to `8000`. Can be set during `docker run` using the `-e` flag: `docker run -p 8080:8080 -e PORT=8080 --name valmiki valmiki`. Model paths are currently hardcoded relative to the `predictor.py` file but could be made configurable via environment variables if needed.
 
 ## Deployment on AWS
 
